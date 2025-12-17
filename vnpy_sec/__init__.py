@@ -21,12 +21,15 @@
 # SOFTWARE.
 
 
-import importlib_metadata
+from importlib import metadata
 
 from .gateway import SecGateway
 
 
+__all__ = ["SecGateway"]
+
+
 try:
-    __version__ = importlib_metadata.version("vnpy_sec")
-except importlib_metadata.PackageNotFoundError:
+    __version__ = metadata.version("vnpy_sec")
+except metadata.PackageNotFoundError:
     __version__ = "dev"
