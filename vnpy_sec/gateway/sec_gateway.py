@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 from datetime import datetime
 from copy import copy
 
@@ -52,54 +52,54 @@ from ..api import (
 
 
 # 多空方向映射
-DIRECTION_VT2SEC: Dict[Direction, int] = {
+DIRECTION_VT2SEC: dict[Direction, int] = {
     Direction.LONG: DFITCSEC_ED_Buy,
     Direction.SHORT: DFITCSEC_ED_Sell
 }
-DIRECTION_SEC2VT: Dict[int, Direction] = {v: k for k, v in DIRECTION_VT2SEC.items()}
+DIRECTION_SEC2VT: dict[int, Direction] = {v: k for k, v in DIRECTION_VT2SEC.items()}
 
 # 股票委托类型映射
-STOCK_PRICE_TYPE_SEC2VT: Dict[int, OrderType] = {
+STOCK_PRICE_TYPE_SEC2VT: dict[int, OrderType] = {
     DFITCSEC_OT_LimitPrice: OrderType.LIMIT,
     DFITCSEC_OT_SHBESTFRTradeLeftWithdraw: OrderType.MARKET
 }
-STOCK_PRICE_TYPE_VT2SEC: Dict[OrderType, int] = {v: k for k, v in STOCK_PRICE_TYPE_SEC2VT.items()}
+STOCK_PRICE_TYPE_VT2SEC: dict[OrderType, int] = {v: k for k, v in STOCK_PRICE_TYPE_SEC2VT.items()}
 
 # 期权委托类型映射
-OPTION_PRICE_TYPE_SEC2VT: Dict[int, OrderType] = {
+OPTION_PRICE_TYPE_SEC2VT: dict[int, OrderType] = {
     DFITCSEC_SOP_LimitPrice: OrderType.LIMIT,
     DFITCSEC_SOP_LastPrice: OrderType.MARKET
 }
-OPTION_PRICE_TYPE_VT2SEC: Dict[OrderType, int] = {v: k for k, v in OPTION_PRICE_TYPE_SEC2VT.items()}
+OPTION_PRICE_TYPE_VT2SEC: dict[OrderType, int] = {v: k for k, v in OPTION_PRICE_TYPE_SEC2VT.items()}
 
 # 开平方向映射
-OFFSET_VT2SEC: Dict[Offset, int] = {
+OFFSET_VT2SEC: dict[Offset, int] = {
     Offset.OPEN: DFITCSEC_OCF_Open,
     Offset.CLOSE: DFITCSEC_OCF_Close,
 }
-OFFSET_SEC2VT: Dict[int, Offset] = {v: k for k, v in OFFSET_VT2SEC.items()}
+OFFSET_SEC2VT: dict[int, Offset] = {v: k for k, v in OFFSET_VT2SEC.items()}
 
 # 交易所映射
-EXCHANGE_SEC2VT: Dict[str, Exchange] = {
+EXCHANGE_SEC2VT: dict[str, Exchange] = {
     DFITCSEC_EI_SH: Exchange.SSE,
     DFITCSEC_EI_SZ: Exchange.SZSE
 }
-EXCHANGE_VT2SEC: Dict[Exchange, int] = {v: k for k, v in EXCHANGE_SEC2VT.items()}
+EXCHANGE_VT2SEC: dict[Exchange, int] = {v: k for k, v in EXCHANGE_SEC2VT.items()}
 
 # 期权类型映射
-OPTION_TYPE_SEC2VT: Dict[int, OptionType] = {
+OPTION_TYPE_SEC2VT: dict[int, OptionType] = {
     DFITCSEC_OT_CALL: OptionType.CALL,
     DFITCSEC_OT_PUT: OptionType.PUT
 }
 
 # 对冲方向映射
-HEDGE_DIRECTION: Dict[int, int] = {
+HEDGE_DIRECTION: dict[int, int] = {
     DFITCSEC_ED_Buy: 2,
     DFITCSEC_ED_Sell: 1
 }
 
 # 采集类型映射
-COLLECTION_TYPE_VT2SEC: Dict[str, int] = {
+COLLECTION_TYPE_VT2SEC: dict[str, int] = {
     "顶点": DFITCSEC_COLLECTTYPE_APEX,
     "恒生": DFITCSEC_COLLECTTYPE_HS,
     "金证": DFITCSEC_COLLECTTYPE_KD,
@@ -107,7 +107,7 @@ COLLECTION_TYPE_VT2SEC: Dict[str, int] = {
 }
 
 # 行情压缩映射
-COMPRESS_VT2SEC: Dict[str, int] = {
+COMPRESS_VT2SEC: dict[str, int] = {
     "Y": DFITCSEC_COMPRESS_TRUE,
     "N": DFITCSEC_COMPRESS_FALSE
 }
@@ -116,7 +116,7 @@ COMPRESS_VT2SEC: Dict[str, int] = {
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
 
 # 合约数据全局缓存字典
-symbol_contract_map: Dict[str, ContractData] = {}
+symbol_contract_map: dict[str, ContractData] = {}
 
 
 class SecGateway(BaseGateway):
@@ -126,7 +126,7 @@ class SecGateway(BaseGateway):
 
     default_name: str = "SEC"
 
-    default_setting: Dict[str, Any] = {
+    default_setting: dict[str, Any] = {
         "账号": "",
         "行情密码": "",
         "交易密码": "",
@@ -139,14 +139,14 @@ class SecGateway(BaseGateway):
         "行情压缩": ["N", "Y"],
     }
 
-    exchanges: List[Exchange] = list(EXCHANGE_VT2SEC.keys())
+    exchanges: list[Exchange] = list(EXCHANGE_VT2SEC.keys())
 
     def __init__(self, event_engine: EventEngine, gateway_name: str) -> None:
         """构造函数"""
         super().__init__(event_engine, gateway_name)
 
-        self.md_api: "SecMdApi" = SecMdApi(self)
-        self.td_api: "SecTdApi" = SecTdApi(self)
+        self.md_api: SecMdApi = SecMdApi(self)
+        self.td_api: SecTdApi = SecTdApi(self)
 
     def connect(self, setting: dict) -> None:
         """连接交易接口"""
@@ -500,12 +500,12 @@ class SecTdApi(TdApi):
         self.app_id: str = ""
         self.collection_type: int = 1
         self.trading_day: str = ""
-        self.positions: Dict[tuple, PositionData] = {}
+        self.positions: dict[tuple, PositionData] = {}
 
         self.sessionid: str = ""
         self.reqid: int = 0
         self.localid: int = 10000
-        self.orders: Dict[str, OrderData] = {}
+        self.orders: dict[str, OrderData] = {}
         self.tradeids: set = set()
 
         self.connect_status: bool = False
