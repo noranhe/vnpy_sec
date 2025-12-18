@@ -3,7 +3,7 @@ from datetime import datetime
 from copy import copy
 
 from vnpy.event import EventEngine
-from vnpy.trader.event import EVENT_TIMER
+from vnpy.trader.event import EVENT_TIMER, Event
 from vnpy.trader.constant import (
     Exchange,
     Product,
@@ -84,7 +84,7 @@ EXCHANGE_SEC2VT: dict[str, Exchange] = {
     DFITCSEC_EI_SH: Exchange.SSE,
     DFITCSEC_EI_SZ: Exchange.SZSE
 }
-EXCHANGE_VT2SEC: dict[Exchange, int] = {v: k for k, v in EXCHANGE_SEC2VT.items()}
+EXCHANGE_VT2SEC: dict[Exchange, str] = {v: k for k, v in EXCHANGE_SEC2VT.items()}
 
 # 期权类型映射
 OPTION_TYPE_SEC2VT: dict[int, OptionType] = {
@@ -147,6 +147,8 @@ class SecGateway(BaseGateway):
 
         self.md_api: SecMdApi = SecMdApi(self)
         self.td_api: SecTdApi = SecTdApi(self)
+
+        self.count: int = 0
 
     def connect(self, setting: dict) -> None:
         """连接交易接口"""
@@ -224,10 +226,10 @@ class SecGateway(BaseGateway):
         """输出错误信息日志"""
         error_id: int = error["errorID"]
         error_msg: str = error["errorMsg"]
-        msg: str = f"{msg}，代码：{error_id}，信息：{error_msg}"
+        msg = f"{msg}，代码：{error_id}，信息：{error_msg}"
         self.write_log(msg)
 
-    def process_timer_event(self, event) -> None:
+    def process_timer_event(self, event: Event) -> None:
         """定时事件处理"""
         self.count += 1
         if self.count < 2:
@@ -240,7 +242,7 @@ class SecGateway(BaseGateway):
 
     def init_query(self) -> None:
         """初始化查询任务"""
-        self.count: int = 0
+        self.count = 0
         self.query_functions: list = [self.query_account, self.query_position]
         self.event_engine.register(EVENT_TIMER, self.process_timer_event)
 
@@ -271,7 +273,7 @@ class SecMdApi(MdApi):
         self.sse_inited: bool = False
         self.szse_inited: bool = False
 
-    def onFrontConnected(self):
+    def onFrontConnected(self) -> None:
         """服务器连接成功回报"""
         self.login_server()
         self.connect_status = True
@@ -472,7 +474,7 @@ class SecMdApi(MdApi):
                 self.subscribeSOPMarketData(symbol, self.reqid)
 
             else:
-                symbol: str = str(EXCHANGE_VT2SEC[req.exchange] + req.symbol)
+                symbol = str(EXCHANGE_VT2SEC[req.exchange] + req.symbol)
                 self.subscribeStockMarketData(symbol, self.reqid)
 
             self.subscribed.add(req.symbol)
@@ -494,7 +496,6 @@ class SecTdApi(TdApi):
 
         self.accountid: str = ""
         self.password: str = ""
-        self.auth_code: str = ""
         self.compress_flag: int = 0
         self.auth_code: str = ""
         self.app_id: str = ""
@@ -559,7 +560,7 @@ class SecTdApi(TdApi):
             timestamp: str = self.trading_day + str(data["entrustTime"])
             dt: datetime = generate_datetime(timestamp)
 
-            order: OrderData = OrderData(
+            order = OrderData(
                 symbol=data["securityID"],
                 exchange=EXCHANGE_SEC2VT[data["exchangeID"]],
                 orderid=orderid,
@@ -592,7 +593,7 @@ class SecTdApi(TdApi):
             timestamp: str = self.trading_day + str(data["entrustTime"])
             dt: datetime = generate_datetime(timestamp)
 
-            order: OrderData = OrderData(
+            order = OrderData(
                 symbol=data["securityID"],
                 exchange=EXCHANGE_SEC2VT[data["exchangeID"]],
                 orderid=orderid,
@@ -706,12 +707,12 @@ class SecTdApi(TdApi):
         if orderid in self.orders:
             order: OrderData = self.orders[orderid]
             dt: datetime = datetime.now()
-            dt: datetime = dt.replace(tzinfo=CHINA_TZ)
+            dt = dt.replace(tzinfo=CHINA_TZ)
             order.datetime = dt
         else:
             timestamp: str = self.trading_day + str(data["entrustTime"])
-            dt: datetime = generate_datetime(timestamp)
-            order: OrderData = OrderData(
+            dt = generate_datetime(timestamp)
+            order = OrderData(
                 symbol=data["securityID"],
                 exchange=EXCHANGE_SEC2VT[data["exchangeID"]],
                 orderid=orderid,
@@ -741,7 +742,7 @@ class SecTdApi(TdApi):
             timestamp: str = self.trading_day + str(data["entrustTime"])
             dt: datetime = generate_datetime(timestamp)
 
-            order: OrderData = OrderData(
+            order = OrderData(
                 symbol=data["securityID"],
                 exchange=EXCHANGE_SEC2VT[data["exchangeID"]],
                 orderid=orderid,
@@ -770,7 +771,7 @@ class SecTdApi(TdApi):
 
             if order:
                 dt: datetime = datetime.now()
-                dt: datetime = dt.replace(tzinfo=CHINA_TZ)
+                dt = dt.replace(tzinfo=CHINA_TZ)
                 order.datetime = dt
                 order.status = Status.REJECTED
                 self.gateway.on_order(order)
@@ -787,7 +788,7 @@ class SecTdApi(TdApi):
 
             if order:
                 dt: datetime = datetime.now()
-                dt: datetime = dt.replace(tzinfo=CHINA_TZ)
+                dt = dt.replace(tzinfo=CHINA_TZ)
                 order.datetime = dt
                 order.status = Status.REJECTED
                 self.gateway.on_order(order)
@@ -861,7 +862,7 @@ class SecTdApi(TdApi):
                 ("159919", Exchange.SZSE, "嘉实沪深300ETF"),
             ]
             for symbol, exchange, name in etfs:
-                contract: ContractData = ContractData(
+                contract = ContractData(
                     symbol=symbol,
                     exchange=exchange,
                     name=name,
@@ -1030,7 +1031,7 @@ class SecTdApi(TdApi):
         )
         self.orders[orderid] = order
 
-        return order.vt_orderid
+        return order.vt_orderid     # type: ignore
 
     def cancel_order(self, req: CancelRequest) -> None:
         """委托撤单"""
@@ -1103,7 +1104,7 @@ class SecTdApi(TdApi):
             self.exit()
 
 
-def check_option_symbol(symbol) -> bool:
+def check_option_symbol(symbol: str) -> bool:
     """检查期权合约"""
     if len(symbol) > 6:
         return True
@@ -1112,14 +1113,14 @@ def check_option_symbol(symbol) -> bool:
 
 def get_option_index(strike_price: float, exchange_instrument_id: str) -> str:
     """获取期权索引"""
-    exchange_instrument_id: str = exchange_instrument_id.replace(" ", "")
+    exchange_instrument_id = exchange_instrument_id.replace(" ", "")
 
     if "M" in exchange_instrument_id:
         n: int = exchange_instrument_id.index("M")
     elif "A" in exchange_instrument_id:
-        n: int = exchange_instrument_id.index("A")
+        n = exchange_instrument_id.index("A")
     elif "B" in exchange_instrument_id:
-        n: int = exchange_instrument_id.index("B")
+        n = exchange_instrument_id.index("B")
     else:
         return str(strike_price)
 
@@ -1132,5 +1133,5 @@ def get_option_index(strike_price: float, exchange_instrument_id: str) -> str:
 def generate_datetime(timestamp: str) -> datetime:
     """生成时间"""
     dt: datetime = datetime.strptime(timestamp, "%Y%m%d%H:%M:%S.%f")
-    dt: datetime = dt.replace(tzinfo=CHINA_TZ)
+    dt = dt.replace(tzinfo=CHINA_TZ)
     return dt
