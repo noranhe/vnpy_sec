@@ -2,8 +2,8 @@ from typing import Any
 from datetime import datetime
 from copy import copy
 
-from vnpy.event import EventEngine
-from vnpy.trader.event import EVENT_TIMER, Event
+from vnpy.event import EventEngine, Event
+from vnpy.trader.event import EVENT_TIMER
 from vnpy.trader.constant import (
     Exchange,
     Product,

@@ -54,7 +54,7 @@ if host_machine.system() == 'windows'
   HsFutuSystemInfo_lib = cpp.find_library('HsFutuSystemInfo', 
                                        dirs: [lib_dir, api_dir],
                                        required: true)
-  HsFutuSystemInfo_lib = cpp.find_library('HsFutuSystemInfo', 
+  InformationCollect_lib = cpp.find_library('InformationCollect', 
                                        dirs: [lib_dir, api_dir],
                                        required: true)
   
@@ -63,7 +63,7 @@ if host_machine.system() == 'windows'
     'vnsecmd',
     sources: ['vnpy_sec/api/vnsec/vnsecmd/vnsecmd.cpp'],
     include_directories: include_dirs,
-    dependencies: [py_dep, DFITCSECMdApi_lib, DFITCSECTraderApi_lib, HsFutuSystemInfo_lib, HsFutuSystemInfo_lib],
+    dependencies: [py_dep, DFITCSECMdApi_lib, DFITCSECTraderApi_lib, HsFutuSystemInfo_lib, InformationCollect_lib],
     install: true,
     subdir: 'vnpy_sec/api'
   )
@@ -73,7 +73,7 @@ if host_machine.system() == 'windows'
     'vnsectd',
     sources: ['vnpy_sec/api/vnsec/vnsectd/vnsectd.cpp'],
     include_directories: include_dirs,
-    dependencies: [py_dep, DFITCSECMdApi_lib, DFITCSECTraderApi_lib, HsFutuSystemInfo_lib, HsFutuSystemInfo_lib],
+    dependencies: [py_dep, DFITCSECMdApi_lib, DFITCSECTraderApi_lib, HsFutuSystemInfo_lib, InformationCollect_lib],
     install: true,
     subdir: 'vnpy_sec/api'
   )
@@ -83,7 +83,7 @@ if host_machine.system() == 'windows'
     'vnpy_sec/api/DFITCSECMdApi.dll',
     'vnpy_sec/api/DFITCSECTraderApi.dll',
     'vnpy_sec/api/HsFutuSystemInfo.dll',
-    'vnpy_sec/api/HsFutuSystemInfo.dll',
+    'vnpy_sec/api/InformationCollect.dll',
   ]
   
   install_data(
